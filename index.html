@@ -8,19 +8,28 @@
       body {
         margin: 0;
         padding: 0;
+        background-color: #f0f0f0;
+      }
+      #container {
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-color: #f0f0f0;
       }
       canvas {
         border: 2px solid #333;
       }
+      @media (max-width: 600px) {
+        canvas {
+          border: 1px solid #333;
+        }
+      }
     </style>
   </head>
   <body>
-    <canvas id="game"></canvas>
+    <div id="container">
+      <canvas id="game"></canvas>
+    </div>
     <script src="https://unpkg.com/kaplay@latest/dist/kaplay.js"></script>
     <script src="game.js"></script>
   </body>

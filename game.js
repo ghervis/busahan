@@ -1,7 +1,13 @@
+const gameSize = Math.min(window.innerWidth - 20, window.innerHeight - 20, 600);
+const scale = gameSize / 600;
+const fontSize = window.innerWidth < 600 ? 10 : 14;
+const passengerSpacing = window.innerWidth < 600 ? 25 : 40;
+const maxPassengersToShow = 1000;
+
 const k = kaplay({
   canvas: document.querySelector("#game"),
-  width: 600,
-  height: 600,
+  width: gameSize,
+  height: gameSize,
 });
 
 const busColors = [
@@ -22,7 +28,7 @@ function shuffle(array) {
 }
 
 function getAABB(bus) {
-  const half = 35;
+  const half = 35 * scale;
   return {
     minX: bus.x - half,
     maxX: bus.x + half,
@@ -45,8 +51,8 @@ k.scene("game", () => {
     const row = Math.floor(i / 5);
     let y = 220 + [0, 60, 80, 140, 160, 220, 240, 300][row];
     positions.push({
-      x: 160 + (i % 5) * 80,
-      y,
+      x: (160 + (i % 5) * 80) * scale,
+      y: y * scale,
       rot: Math.floor(i / 5) % 2 === 0 ? 45 : 135,
       color: busColors[Math.floor(Math.random() * busColors.length)],
       capacity: [2, 4, 6][Math.floor(Math.random() * 3)],
@@ -101,25 +107,15 @@ k.scene("game", () => {
   let movingBus = null;
 
   // Background
-  k.add([k.rect(600, 600), k.pos(0, 0), k.color(200, 200, 200)]);
-
-  // Instructions
-  k.add([
-    k.text(
-      "Click a bus in parking to place it in an empty pickup slot.\nMatching passengers board automatically. Manage the jam!",
-      14
-    ),
-    k.pos(10, 10),
-    k.color(0, 0, 0),
-  ]);
+  k.add([k.rect(gameSize, gameSize), k.pos(0, 0), k.color(200, 200, 200)]);
 
   // Draw slot backgrounds once
   for (let i = 0; i < 4; i++) {
     k.add([
-      k.rect(80, 40),
-      k.pos(100 + i * 120, 150),
+      k.rect(80 * scale, 40 * scale),
+      k.pos((100 + i * 120) * scale, 150 * scale),
       k.color(150, 150, 150),
-      k.outline(2, k.color(0, 0, 0)),
+      k.outline(2 * scale, k.color(0, 0, 0)),
       k.area(),
       "slot",
       { slotIdx: i },
@@ -127,24 +123,25 @@ k.scene("game", () => {
   }
 
   function drawPassengers() {
+    const displayCount = Math.min(passengers.length, maxPassengersToShow);
     // Remove excess objects
-    while (passengerObjs.length > passengers.length) {
+    while (passengerObjs.length > displayCount) {
       passengerObjs.pop().destroy();
     }
     // Add missing objects
-    while (passengerObjs.length < passengers.length) {
+    while (passengerObjs.length < displayCount) {
       const idx = passengerObjs.length;
       passengerObjs.push(
         k.add([
-          k.circle(20),
-          k.pos(50 + idx * 40, 50),
+          k.circle(20 * scale),
+          k.pos((50 + idx * passengerSpacing) * scale, 50 * scale),
           k.color(...passengers[idx]),
         ])
       );
     }
     // Update positions and colors
     passengerObjs.forEach((obj, idx) => {
-      obj.pos.x = 50 + idx * 40;
+      obj.pos.x = (50 + idx * passengerSpacing) * scale;
       obj.use(k.color(...passengers[idx]));
     });
   }
@@ -154,7 +151,7 @@ k.scene("game", () => {
     parkingObjs = [];
     parkingBuses.forEach((bus, idx) => {
       const obj = k.add([
-        k.rect(60, 30),
+        k.rect(60 * scale, 30 * scale),
         k.pos(bus.x, bus.y),
         k.rotate(bus.rot),
         k.color(...bus.color),
@@ -165,8 +162,8 @@ k.scene("game", () => {
 
       // Add thick white border on the left
       obj.add([
-        k.rect(5, 30),
-        k.pos(bus.dir ? 0 : 60, 0),
+        k.rect(5 * scale, 30 * scale),
+        k.pos(bus.dir ? 0 : 60 * scale, 0),
         k.color(255, 255, 255),
       ]);
       parkingObjs.push(obj);
@@ -197,10 +194,10 @@ k.scene("game", () => {
       }
       for (let i = 0; i < bus.capacity; i++) {
         const circle = obj.add([
-          k.circle(5),
-          k.pos(offsets[i].x, offsets[i].y),
+          k.circle(5 * scale),
+          k.pos(offsets[i].x * scale, offsets[i].y * scale),
           k.color(255, 255, 255),
-          k.outline(1, k.color(0, 0, 0)),
+          k.outline(1 * scale, k.color(0, 0, 0)),
         ]);
       }
     });
@@ -214,8 +211,8 @@ k.scene("game", () => {
     slots.forEach((bus, idx) => {
       if (bus) {
         const obj = k.add([
-          k.rect(60, 30),
-          k.pos(110 + idx * 120, 155),
+          k.rect(60 * scale, 30 * scale),
+          k.pos((110 + idx * 120) * scale, 155 * scale),
           k.color(...bus.color),
           k.area(),
           "slotBus",
@@ -250,10 +247,10 @@ k.scene("game", () => {
         for (let i = 0; i < bus.capacity; i++) {
           const filled = i < bus.current;
           const circle = obj.add([
-            k.circle(5),
-            k.pos(offsets[i].x, offsets[i].y),
+            k.circle(5 * scale),
+            k.pos(offsets[i].x * scale, offsets[i].y * scale),
             filled ? k.color(...bus.color) : k.color(255, 255, 255),
-            k.outline(1, k.color(0, 0, 0)),
+            k.outline(1 * scale, k.color(0, 0, 0)),
           ]);
         }
       }
@@ -325,8 +322,8 @@ k.scene("game", () => {
       // check if 1 second passed
       if (movingBus.timer >= 1) {
         // teleport to slot
-        const targetX = 110 + movingBus.targetSlotIdx * 120;
-        movingBus.bus.pos = k.vec2(targetX, 155);
+        const targetX = (110 + movingBus.targetSlotIdx * 120) * scale;
+        movingBus.bus.pos = k.vec2(targetX, 155 * scale);
         movingBus.bus.angle = 0;
         // place in slot
         slots[movingBus.targetSlotIdx] = {
