@@ -162,8 +162,16 @@ k.scene("game", () => {
 
       // Add thick white border on the left
       obj.add([
-        k.rect(5 * scale, 30 * scale),
-        k.pos(bus.dir ? 0 : 60 * scale, 0),
+        k.polygon([
+          bus.dir
+            ? k.vec2(-8 * scale, 15 * scale)
+            : k.vec2(68 * scale, 15 * scale),
+          bus.dir ? k.vec2(0, 0) : k.vec2(60 * scale, 0),
+          bus.dir
+            ? k.vec2(-3 * scale, 15 * scale)
+            : k.vec2(63 * scale, 15 * scale),
+          bus.dir ? k.vec2(0, 30 * scale) : k.vec2(60 * scale, 30 * scale),
+        ]),
         k.color(255, 255, 255),
       ]);
       parkingObjs.push(obj);
